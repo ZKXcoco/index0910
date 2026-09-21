@@ -334,6 +334,17 @@
         display: block;
       }
 
+      .hero__model {
+        position: absolute;
+        z-index: 3;
+        right: clamp(18px, 3vw, 48px);
+        bottom: clamp(18px, 4vh, 48px);
+        width: min(25vw, 340px);
+        height: min(39vh, 300px);
+        border: 0;
+        background: transparent;
+      }
+
       .hero__inner {
         position: relative;
         z-index: 2;
@@ -1455,6 +1466,14 @@
       }
 
       @media (max-width: 820px) {
+        .hero__model {
+          right: 3%;
+          bottom: 5%;
+          width: 36vw;
+          height: 26%;
+          opacity: 0.82;
+        }
+
         .hero__spec b { font-size: 1.15rem; }
         .hero__spec li { padding-left: 16px; }
         .portfolio-grid { grid-template-columns: 1fr; }
@@ -1534,6 +1553,7 @@
       <!-- ============ 首屏 ============ -->
       <section class="hero" aria-label="个人主张" data-page-node-id="Qqqpvdln69mnQqzEmndEag">
         <canvas id="lilyCanvas" data-page-node-id="184PTnw4FEHKsHiozNb14y"></canvas>
+        <iframe class="hero__model" title="白坯立裁礼服 3D 模型" src="dress-3d-model/dress_3d_model_20260921_viewer.html" allow="autoplay; fullscreen; xr-spatial-tracking" loading="eager"></iframe>
         <div class="hero__inner" data-page-node-id="X2rzZ3qbFNGrp9Cs7wwgDG">
           <div class="hero__top" data-page-node-id="kDSTat6jVu4b77RmYqde85">
             <p class="hero__eyebrow" data-page-node-id="QuqRTwdxyb8c7GbgxVlIyU">Art &amp; Technology &amp; Business<br  data-page-node-id="fg2Hd7gkdxKFU8XsSmUbtA"/>Portfolio — Curriculum Vitae 2026</p>

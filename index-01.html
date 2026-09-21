@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>珍珠雪纱手提包 · 3D 模型</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f3ede4'/%3E%3Ccircle cx='32' cy='22' r='7' fill='%23ffffff' stroke='%23d4a04a' stroke-width='1.5'/%3E%3Crect x='18' y='28' width='28' height='22' rx='4' fill='%23ffffff' stroke='%23d4a04a' stroke-width='1.5'/%3E%3C/svg%3E">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #f3ede4; font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif; }
+  #app { width: 100%; height: 100%; }
+  canvas { display: block; }
+
+  .hud {
+    position: absolute; top: 28px; left: 32px; z-index: 10;
+    color: #4a3f35; pointer-events: none;
+  }
+  .hud .tag {
+    display: inline-block; font-size: 11px; letter-spacing: 3px;
+    text-transform: uppercase; color: #a08b6f; margin-bottom: 8px;
+  }
+  .hud h1 { font-size: 26px; font-weight: 600; letter-spacing: 1px; }
+  .hud p { font-size: 13px; color: #8a7a66; margin-top: 6px; }
+
+  .hint {
+    position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+    z-index: 10; font-size: 12px; color: #9a8a76; letter-spacing: 1px;
+    background: rgba(255,255,255,0.55); padding: 8px 18px; border-radius: 20px;
+    backdrop-filter: blur(6px); pointer-events: none;
+  }
+  .badge {
+    position: absolute; top: 28px; right: 32px; z-index: 10;
+    font-size: 11px; color: #a08b6f; letter-spacing: 2px;
+    border: 1px solid #d8c9b3; padding: 6px 14px; border-radius: 16px;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="hud">
+  <span class="tag">3D · Interactive Model</span>
+  <h1>珍珠雪纱手提包</h1>
+  <p>White Pearl Handle · Organza Flower · Soft Leather</p>
+</div>
+<div class="badge">REAL-TIME WEBGL</div>
+<div class="hint">拖拽旋转 · 滚轮缩放 · 右键平移</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function () {
+  // ---------- 渲染器 ----------
+  const container = document.getElementById('app');
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
+  container.appendChild(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xf3ede4);
+
+  // ---------- 相机 ----------
+  const camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.01, 50);
+  camera.position.set(0.42, 0.28, 0.55);
+
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.target.set(0, 0.13, 0);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.minDistance = 0.25;
+  controls.maxDistance = 1.6;
+  controls.minPolarAngle = Math.PI * 0.15;
+  controls.maxPolarAngle = Math.PI * 0.52;
+
+  // ---------- 灯光 ----------
+  // 主光（左前上方，暖白）
+  const keyLight = new THREE.DirectionalLight(0xfff4e0, 1.6);
+  keyLight.position.set(0.5, 0.8, 0.5);
+  keyLight.castShadow = true;
+  keyLight.shadow.mapSize.set(2048, 2048);
+  keyLight.shadow.camera.near = 0.1;
+  keyLight.shadow.camera.far = 3;
+  keyLight.shadow.camera.left = -0.5;
+  keyLight.shadow.camera.right = 0.5;
+  keyLight.shadow.camera.top = 0.5;
+  keyLight.shadow.camera.bottom = -0.5;
+  keyLight.shadow.bias = -0.0004;
+  keyLight.shadow.radius = 4;
+  scene.add(keyLight);
+
+  // 补光（右后方，偏冷，提亮暗部）
+  const fillLight = new THREE.DirectionalLight(0xdfe8ff, 0.5);
+  fillLight.position.set(-0.6, 0.3, -0.4);
+  scene.add(fillLight);
+
+  // 轮廓光（后上方）
+  const rimLight = new THREE.DirectionalLight(0xffffff, 0.6);
+  rimLight.position.set(0, 0.6, -0.6);
+  scene.add(rimLight);
+
+  // 环境光（让皮革暗部不发死黑）
+  const hemi = new THREE.HemisphereLight(0xfff6e8, 0xc9b89a, 0.55);
+  scene.add(hemi);
+
+  // ---------- 桌面 ----------
+  const deskMat = new THREE.MeshStandardMaterial({
+    color: 0xd9c4a3, roughness: 0.85, metalness: 0.0
+  });
+  const desk = new THREE.Mesh(new THREE.PlaneGeometry(4, 4), deskMat);
+  desk.rotation.x = -Math.PI / 2;
+  desk.receiveShadow = true;
+  scene.add(desk);
+
+  // ---------- 手提包整体 ----------
+  const bag = new THREE.Group();
+  scene.add(bag);
+
+  // 包身：鼓胀的软皮盒体
+  function makeBodyGeometry() {
+    const w = 0.30, h = 0.18, d = 0.13;
+    const geo = new THREE.BoxGeometry(w, h, d, 24, 16, 16);
+    const pos = geo.attributes.position;
+    const v = new THREE.Vector3();
+    for (let i = 0; i < pos.count; i++) {
+      v.fromBufferAttribute(pos, i);
+      // 让六个面整体向外鼓胀（软皮填充感）
+      const nx = v.x / (w / 2);
+      const ny = v.y / (h / 2);
+      const nz = v.z / (d / 2);
+      // 中心鼓包
+      const bulgeX = 1 - nx * nx;
+      const bulgeY = 1 - ny * ny;
+      const bulgeZ = 1 - nz * nz;
+      v.x += (v.x >= 0 ? 1 : -1) * 0.012 * bulgeY * bulgeZ;
+      v.y += (v.y >= 0 ? 1 : -1) * 0.010 * bulgeX * bulgeZ;
+      v.z += (v.z >= 0 ? 1 : -1) * 0.014 * bulgeX * bulgeY;
+      // 边角做轻微内收圆角
+      const corner = Math.pow(Math.abs(nx) * Math.abs(ny) * Math.abs(nz), 0.5);
+      v.multiplyScalar(1 - corner * 0.04);
+      pos.setXYZ(i, v.x, v.y, v.z);
+    }
+    geo.computeVertexNormals();
+    return geo;
+  }
+
+  const leatherMat = new THREE.MeshStandardMaterial({
+    color: 0xf6f1e7, roughness: 0.55, metalness: 0.0
+  });
+  const body = new THREE.Mesh(makeBodyGeometry(), leatherMat);
+  body.position.y = 0.09;
+  body.castShadow = true;
+  body.receiveShadow = true;
+  bag.add(body);
+
+  // 包身上沿的折叠边（前后两条）
+  function makeFold(z) {
+    const fold = new THREE.Mesh(
+      new THREE.CapsuleGeometry(0.008, 0.28, 6, 12),
+      leatherMat
+    );
+    fold.rotation.z = Math.PI / 2;
+    fold.position.set(0, 0.182, z);
+    fold.castShadow = true;
+    bag.add(fold);
+  }
+  makeFold(0.062);
+  makeFold(-0.062);
+
+  // ---------- 珍珠手柄 ----------
+  // 拱形路径：两端固定在包身上沿左右两侧
+  const handleCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(-0.115, 0.185, 0.0),
+    new THREE.Vector3(-0.120, 0.260, 0.0),
+    new THREE.Vector3(-0.060, 0.315, 0.0),
+    new THREE.Vector3( 0.000, 0.330, 0.0),
+    new THREE.Vector3( 0.060, 0.315, 0.0),
+    new THREE.Vector3( 0.120, 0.260, 0.0),
+    new THREE.Vector3( 0.115, 0.185, 0.0)
+  ]);
+
+  const pearlMat = new THREE.MeshPhysicalMaterial({
+    color: 0xffffff, roughness: 0.15, metalness: 0.0,
+    clearcoat: 1.0, clearcoatRoughness: 0.08
+  });
+  const pearlGeo = new THREE.SphereGeometry(0.0082, 16, 12);
+  const pearlCount = 42;
+  for (let i = 0; i <= pearlCount; i++) {
+    const t = i / pearlCount;
+    const p = handleCurve.getPoint(t);
+    const pearl = new THREE.Mesh(pearlGeo, pearlMat);
+    pearl.position.copy(p);
+    pearl.castShadow = true;
+    bag.add(pearl);
+  }
+
+  // ---------- 雪纱花朵 ----------
+  // 花瓣形状
+  function petalShape(len, wid) {
+    const s = new THREE.Shape();
+    s.moveTo(0, 0);
+    s.bezierCurveTo(wid, len * 0.25, wid * 0.9, len * 0.75, 0, len);
+    s.bezierCurveTo(-wid * 0.9, len * 0.75, -wid, len * 0.25, 0, 0);
+    return s;
+  }
+
+  const organzaMat = new THREE.MeshPhysicalMaterial({
+    color: 0xf3ece0, transparent: true, opacity: 0.62,
+    roughness: 0.45, metalness: 0, side: THREE.DoubleSide,
+    depthWrite: false
+  });
+  const goldMat = new THREE.MeshStandardMaterial({
+    color: 0xd4a04a, roughness: 0.3, metalness: 1.0
+  });
+
+  function makeFlower(scale) {
+    const grp = new THREE.Group();
+    const petalCount = 7;
+    for (let ring = 0; ring < 2; ring++) {
+      const n = ring === 0 ? petalCount : petalCount;
+      const len = (ring === 0 ? 0.085 : 0.06) * scale;
+      const wid = (ring === 0 ? 0.038 : 0.026) * scale;
+      for (let i = 0; i < n; i++) {
+        const petal = new THREE.Mesh(
+          new THREE.ShapeGeometry(petalShape(len, wid), 12),
+          organzaMat
+        );
+        const angle = (i / n) * Math.PI * 2 + (ring * Math.PI / n);
+        petal.rotation.z = angle;
+        petal.rotation.x = (ring === 0 ? 0.12 : -0.05) + (Math.random() - 0.5) * 0.1;
+        petal.position.z = ring * 0.003;
+        grp.add(petal);
+      }
+    }
+    // 金色花蕊（一簇小球）
+    for (let i = 0; i < 9; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const r = Math.random() * 0.012 * scale;
+      const bead = new THREE.Mesh(
+        new THREE.SphereGeometry(0.0035 * scale * (0.7 + Math.random() * 0.6), 8, 6),
+        goldMat
+      );
+      bead.position.set(Math.cos(a) * r, Math.sin(a) * r, 0.006);
+      grp.add(bead);
+    }
+    // 中心小金珠
+    const center = new THREE.Mesh(
+      new THREE.SphereGeometry(0.005 * scale, 12, 8), goldMat
+    );
+    center.position.z = 0.008;
+    grp.add(center);
+    return grp;
+  }
+
+  // 大花（右前方）
+  const flower1 = makeFlower(1.15);
+  flower1.position.set(0.05, 0.13, 0.082);
+  flower1.rotation.x = -0.08;
+  flower1.rotation.z = -0.3;
+  bag.add(flower1);
+
+  // 小花（左前方）
+  const flower2 = makeFlower(0.9);
+  flower2.position.set(-0.055, 0.115, 0.083);
+  flower2.rotation.x = -0.05;
+  flower2.rotation.z = 0.6;
+  bag.add(flower2);
+
+  // 几片垂坠的雪纱飘带
+  function makeRibbon(len, wid) {
+    const s = new THREE.Shape();
+    s.moveTo(-wid / 2, 0);
+    s.quadraticCurveTo(0, -len * 0.5, wid / 2, -len);
+    s.lineTo(-wid / 2, -len);
+    s.lineTo(-wid / 2, 0);
+    return new THREE.Mesh(new THREE.ShapeGeometry(s, 8), organzaMat);
+  }
+  const ribbon1 = makeRibbon(0.09, 0.035);
+  ribbon1.position.set(-0.01, 0.10, 0.086);
+  ribbon1.rotation.z = 0.3;
+  bag.add(ribbon1);
+  const ribbon2 = makeRibbon(0.07, 0.028);
+  ribbon2.position.set(0.01, 0.095, 0.087);
+  ribbon2.rotation.z = -0.2;
+  bag.add(ribbon2);
+
+  // ---------- 自适应 ----------
+  window.addEventListener('resize', function () {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  // ---------- 动画循环 ----------
+  function tick() {
+    requestAnimationFrame(tick);
+    controls.update();
+    renderer.render(scene, camera);
+  }
+  tick();
+})();
+</script>
+</body>
+</html>

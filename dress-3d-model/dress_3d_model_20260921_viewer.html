@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="xa6l9IfIr4MCCQcSKCBWYp">
+<head data-page-node-id="6BunqvIkqgOtTe3czdU0jc">
+  <meta charset="UTF-8" data-page-node-id="AE7aydvTyD2fHA3a31VhCe">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="FUt3IvlXuiC26ECU1Dkr7v">
+  <title>3D Model Viewer — 白坯立裁礼服</title>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <style>
+    html, body { margin: 0; overflow: hidden; background: transparent; font-family: "Microsoft YaHei", sans-serif; }
+    model-viewer { width: 100vw; height: 100vh; background-color: transparent; cursor: grab; }
+    #tip {
+      position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.55); color: #fff; padding: 8px 18px;
+      border-radius: 20px; font-size: 14px; pointer-events: none;
+      transition: opacity .4s; z-index: 10;
+    }
+    #err {
+      display: none; position: fixed; inset: 0; background: transparent;
+      color: #333; padding: 40px; text-align: center; padding-top: 30vh;
+      font-size: 16px; line-height: 1.8; z-index: 20;
+    }
+  </style>
+</head>
+<body data-page-node-id="OA0A3zBuDSThPDOwfsThh7">
+  <model-viewer id="mv" src="dress_3d_model_20260921.glb"
+    camera-controls auto-rotate shadow-intensity="1"
+    exposure="1.1" data-page-node-id="Inhoactt3OYrDscJUlJqhh">
+  </model-viewer>
+  <div id="tip" data-page-node-id="qv1F1xejnEIWDfqNYtIH5S">模型加载中…（约 29MB，请稍候）</div>
+  <div id="err" data-page-node-id="EeUECfOjqmi4KvZgXiooAG">
+    模型加载失败。<br data-page-node-id="x4pwKWCNxIwz2y3GWCsfbf">
+    请不要直接双击打开本文件（file:// 协议无法加载模型）。<br data-page-node-id="QdMqnvtDK5spmXo4YxWBLH">
+    请在 WorkBuddy 对话中点击产物卡片，或用 VS Code 的 Live Server 打开本目录。
+  </div>
+  <script>
+    const mv = document.getElementById('mv');
+    const tip = document.getElementById('tip');
+    let pointerFrame = 0;
+    let pointerX = 0.5;
+    let pointerY = 0.5;
+
+    function updateOrbitFromPointer() {
+      pointerFrame = 0;
+      if (!mv.loaded) return;
+
+      const horizontalAngle = (pointerX - 0.5) * Math.PI * 1.25;
+      const verticalAngle = Math.PI / 2 + (pointerY - 0.5) * 0.42;
+      mv.cameraOrbit = `${horizontalAngle}rad ${verticalAngle}rad auto`;
+    }
+
+    mv.addEventListener('pointerenter', () => {
+      mv.autoRotate = false;
+    });
+
+    mv.addEventListener('pointermove', (event) => {
+      if (event.pointerType !== 'mouse') return;
+
+      const bounds = mv.getBoundingClientRect();
+      pointerX = Math.min(1, Math.max(0, (event.clientX - bounds.left) / bounds.width));
+      pointerY = Math.min(1, Math.max(0, (event.clientY - bounds.top) / bounds.height));
+      if (!pointerFrame) pointerFrame = requestAnimationFrame(updateOrbitFromPointer);
+    });
+
+    mv.addEventListener('pointerleave', () => {
+      mv.autoRotate = true;
+    });
+
+    mv.addEventListener('load', () => { tip.style.opacity = '0'; });
+    mv.addEventListener('error', () => {
+      tip.style.display = 'none';
+      document.getElementById('err').style.display = 'block';
+    });
+  </script>
+</body>
+</html>
